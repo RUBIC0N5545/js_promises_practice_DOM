@@ -14,53 +14,65 @@ const firstPromise = new Promise((resolve, reject) => {
 });
 
 const secondPromise = new Promise((resolve) => {
-  document.addEventListener('click', () => {
-    resolve();
-  });
+  let isResolved = false;
 
-  document.addEventListener('contextmenu', () => {
-    resolve();
-  });
+  const handleResolve = () => {
+    if (!isResolved) {
+      isResolved = true;
+      resolve();
+    }
+  };
+
+  document.addEventListener('click', handleResolve);
+  document.addEventListener('contextmenu', handleResolve);
 });
 
 const thirdPromise = new Promise((resolve) => {
   let leftClick = false;
   let rightClick = false;
+  let isResolved = false;
 
-  document.addEventListener('click', () => {
+  const handleLeftClick = () => {
     leftClick = true;
+    checkBothClicks();
+  };
 
-    if (leftClick && rightClick) {
-      resolve();
-    }
-  });
-
-  document.addEventListener('contextmenu', () => {
+  const handleRightClick = () => {
     rightClick = true;
+    checkBothClicks();
+  };
 
-    if (leftClick && rightClick) {
+  const checkBothClicks = () => {
+    if (leftClick && rightClick && !isResolved) {
+      isResolved = true;
       resolve();
+
+      document.removeEventListener('click', handleLeftClick);
+      document.removeEventListener('contextmenu', handleRightClick);
     }
-  });
+  };
+
+  document.addEventListener('click', handleLeftClick);
+  document.addEventListener('contextmenu', handleRightClick);
 });
 
 firstPromise
   .then(() => {
-    showMeassge('success', 'First promise was resolved');
+    showMessage('success', 'First promise was resolved');
   })
   .catch(() => {
-    showMeassge('error', 'First promise was rejected');
+    showMessage('error', 'First promise was rejected');
   });
 
 secondPromise.then(() => {
-  showMeassge('success', 'Second promise was resolved');
+  showMessage('success', 'Second promise was resolved');
 });
 
 thirdPromise.then(() => {
-  showMeassge('success', 'Third promise was resolved');
+  showMessage('success', 'Third promise was resolved');
 });
 
-function showMeassge(type, message) {
+function showMessage(type, message) {
   const notification = document.createElement('div');
 
   notification.dataset.qa = 'notification';
